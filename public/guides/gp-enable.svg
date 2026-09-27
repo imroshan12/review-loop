@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240" role="img" aria-labelledby="title desc">
+  <title id="title">Enable the Google Play Android Developer API</title>
+  <desc id="desc">Choose your project in the top bar, then click Enable on the Google Play Android Developer API page.</desc>
+  <style>
+    text { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .bg { fill: #f3f3f0; } .panel { fill: #ffffff; stroke: #d6d6d0; } .chip { fill: #eef0ff; } .icon { fill: #dfe7fb; }
+    .text { fill: #1c1c21; } .muted { fill: #7c7c84; }
+    .hl { fill: none; stroke: #4f46e5; stroke-width: 2.5; } .mark { fill: #4f46e5; } .marktext { fill: #ffffff; font-weight: 700; }
+    .btn { fill: #2f6fdc; } .btntext { fill: #ffffff; font-weight: 600; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #16161a; } .panel { fill: #202026; stroke: #35353d; } .chip { fill: #2a2850; } .icon { fill: #243554; }
+      .text { fill: #ececf0; } .muted { fill: #9a9aa3; } .hl { stroke: #8f89ff; } .mark { fill: #7c74ff; } .btn { fill: #4d86e8; }
+    }
+  </style>
+  <rect class="bg" width="640" height="240" rx="12"/>
+
+  <rect class="panel" x="16" y="16" width="608" height="40" rx="8"/>
+  <text class="text" x="32" y="41" font-size="14" font-weight="600">Google Cloud</text>
+  <rect class="chip" x="146" y="26" width="138" height="21" rx="6"/>
+  <text class="text" x="156" y="41" font-size="12">My project  ▾</text>
+  <rect class="hl" x="142" y="22" width="146" height="29" rx="8"/>
+  <circle class="mark" cx="306" cy="36.5" r="11"/>
+  <text class="marktext" x="306" y="41" font-size="11.5" text-anchor="middle">1</text>
+
+  <rect class="panel" x="16" y="64" width="608" height="160" rx="8"/>
+  <text class="muted" x="32" y="90" font-size="12">APIs and services  ›  Library</text>
+  <rect class="icon" x="32" y="106" width="48" height="48" rx="10"/>
+  <text class="text" x="96" y="124" font-size="15" font-weight="600">Google Play Android Developer API</text>
+  <text class="muted" x="96" y="144" font-size="12">Lets you access Google Play Console data, including reviews</text>
+  <rect class="btn" x="96" y="168" width="84" height="32" rx="6"/>
+  <text class="btntext" x="138" y="189" font-size="13" text-anchor="middle">Enable</text>
+  <rect class="hl" x="92" y="164" width="92" height="40" rx="8"/>
+  <circle class="mark" cx="204" cy="184" r="11"/>
+  <text class="marktext" x="204" y="188.5" font-size="11.5" text-anchor="middle">2</text>
+</svg>

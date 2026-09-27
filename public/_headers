@@ -1,0 +1,10 @@
+# Headers for static files (the Worker sets its own on every page it renders).
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Cross-Origin-Resource-Policy: same-origin
+  X-Frame-Options: DENY
+
+# SVGs opened directly in a tab can't run or load anything.
+/*.svg
+  Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox

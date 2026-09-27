@@ -1,0 +1,492 @@
+# ============================================================
+# React Native — Production .gitignore
+# ============================================================
+
+
+# ============================================================
+# NODE / JAVASCRIPT
+# ============================================================
+
+node_modules/
+
+# npm
+npm-debug.log*
+npm-error.log*
+
+# Yarn
+yarn-debug.log*
+yarn-error.log*
+.yarn-integrity
+
+# pnpm
+pnpm-debug.log*
+
+# Package manager caches
+.npm/
+.pnpm-store/
+
+# TypeScript
+*.tsbuildinfo
+
+
+# ============================================================
+# ENVIRONMENT / LOCAL CONFIGURATION
+# ============================================================
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
+# Local-only configuration
+*.local
+*.local.json
+
+# Never commit credentials
+credentials.json
+secrets.json
+secret.json
+
+# Generic private keys / certificates
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# Local API/config files
+config.local.*
+config.*.local.*
+
+
+# ============================================================
+# REACT NATIVE / METRO
+# ============================================================
+
+# Metro cache
+.metro/
+.metro-cache/
+
+# React Native packager cache
+.react-native/
+packager/
+
+# Metro temporary files
+*.bundle
+*.bundle.map
+
+# React Native generated bundles
+index.android.bundle
+index.android.bundle.map
+index.ios.bundle
+index.ios.bundle.map
+
+# Hermes
+*.hbc
+
+# Watchman
+.watchmanconfig.local
+
+
+# ============================================================
+# ANDROID / GRADLE
+# ============================================================
+
+# Gradle
+.gradle/
+**/.gradle/
+
+# Android build outputs
+android/build/
+android/app/build/
+
+# Native build intermediates
+android/.cxx/
+android/app/.cxx/
+android/.externalNativeBuild/
+android/app/.externalNativeBuild/
+
+# Android local SDK configuration
+android/local.properties
+
+# Android Studio generated project metadata
+android/.idea/
+android/*.iml
+android/app/*.iml
+
+# APK / AAB outputs
+*.apk
+*.aab
+
+# DEX
+*.dex
+
+# Android signing
+*.jks
+*.keystore
+
+# Signing configuration
+android/key.properties
+android/keystore.properties
+
+# Native crash dumps
+*.hprof
+
+
+# ============================================================
+# ANDROID FIREBASE
+# ============================================================
+
+# IMPORTANT:
+# google-services.json is intentionally NOT ignored.
+#
+# If your repository is private and this file contains only
+# normal Firebase client configuration, it can be committed.
+#
+# DO NOT commit privileged Firebase service-account credentials.
+
+firebase-service-account.json
+service-account.json
+*-firebase-adminsdk-*.json
+
+
+# ============================================================
+# IOS / XCODE
+# ============================================================
+
+# Xcode user-specific files
+**/*.xcodeproj/xcuserdata/
+**/*.xcworkspace/xcuserdata/
+
+# Xcode user state
+*.xcuserstate
+
+# Xcode derived data
+DerivedData/
+**/DerivedData/
+
+# Xcode build output
+ios/build/
+
+# Xcode archives
+*.xcarchive
+
+# iOS packages
+*.ipa
+
+# Debug symbols
+*.dSYM
+*.dSYM.zip
+
+# Xcode generated files
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+
+# Old Xcode user project files
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# Xcode logs
+*.xcactivitylog
+
+# Swift generated artifacts
+*.swiftmodule
+*.swiftdoc
+*.swiftsourceinfo
+
+# iOS provisioning/signing
+*.mobileprovision
+*.provisionprofile
+*.cer
+
+# iOS simulator
+CoreSimulator/
+
+
+# ============================================================
+# COCOAPODS
+# ============================================================
+
+# CocoaPods dependencies
+ios/Pods/
+
+# CocoaPods generated symlinks
+ios/.symlinks/
+
+# CocoaPods build
+ios/build/
+
+# IMPORTANT:
+# ios/Podfile
+# ios/Podfile.lock
+#
+# SHOULD be committed.
+
+
+# ============================================================
+# IOS FIREBASE
+# ============================================================
+
+# GoogleService-Info.plist is intentionally NOT ignored.
+#
+# Commit it if your repository/security model allows it.
+#
+# DO NOT commit private certificates or service credentials.
+
+
+# ============================================================
+# FASTLANE
+# ============================================================
+
+# Fastlane reports
+fastlane/report.xml
+fastlane/Preview.html
+
+# Fastlane screenshots
+fastlane/screenshots/**/*.html
+
+# Test output
+fastlane/test_output/
+
+# Fastlane generated metadata
+fastlane/README.md
+
+# Fastlane sensitive files
+fastlane/*.cer
+fastlane/*.p12
+fastlane/*.mobileprovision
+
+# If using fastlane match, don't commit decrypted signing assets
+fastlane/*.key
+
+
+# ============================================================
+# FIREBASE
+# ============================================================
+
+# Firebase CLI local data
+.firebase/
+
+# Firebase emulator data
+.emulator/
+
+# Firebase logs
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Firebase privileged credentials
+firebase-service-account.json
+service-account.json
+*-firebase-adminsdk-*.json
+
+
+# ============================================================
+# TESTING
+# ============================================================
+
+# Jest coverage
+coverage/
+.nyc_output/
+
+# Jest output
+jest-results/
+
+# Detox
+artifacts/
+detox.log
+detox-report.xml
+
+# E2E generated files
+e2e/.detox/
+
+
+# ============================================================
+# CACHE / TEMPORARY FILES
+# ============================================================
+
+.cache/
+.cache-loader/
+.tmp/
+tmp/
+temp/
+
+.parcel-cache/
+
+# ESLint
+.eslintcache
+
+# Stylelint
+.stylelintcache
+
+
+# ============================================================
+# LOGS
+# ============================================================
+
+*.log
+logs/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# ============================================================
+# IDE / EDITORS
+# ============================================================
+
+# VS Code
+.vscode/
+
+# If you want to share workspace settings,
+# replace the above with:
+#
+# .vscode/*
+# !.vscode/settings.json
+# !.vscode/extensions.json
+# !.vscode/tasks.json
+# !.vscode/launch.json
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+
+# JetBrains
+*.ipr
+*.iws
+
+# Vim
+*.swp
+*.swo
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Sublime
+*.sublime-workspace
+*.sublime-project
+
+
+# ============================================================
+# MACOS
+# ============================================================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# macOS temporary files
+._*
+
+# Spotlight
+.Spotlight-V100
+
+# Trash
+.Trashes
+
+# AppleDouble
+.AppleDB
+.AppleDesktop
+
+# Network Trash
+Network Trash Folder
+
+
+# ============================================================
+# WINDOWS
+# ============================================================
+
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+Desktop.ini
+
+$RECYCLE.BIN/
+
+*.stackdump
+
+
+# ============================================================
+# LINUX
+# ============================================================
+
+*~
+.directory
+
+
+# ============================================================
+# COVERAGE / REPORTS
+# ============================================================
+
+coverage/
+.nyc_output/
+*.lcov
+
+
+# ============================================================
+# GENERATED DOCUMENTATION
+# ============================================================
+
+docs/.cache/
+
+
+# ============================================================
+# PATCH / BACKUP FILES
+# ============================================================
+
+*.orig
+*.rej
+*.bak
+*.backup
+
+
+# ============================================================
+# LOCAL DATABASES
+# ============================================================
+
+# Ignore local development databases
+*.sqlite
+*.sqlite3
+
+# Uncomment if your repository intentionally tracks a DB:
+# !path/to/tracked/database.sqlite
+
+
+# ============================================================
+# GENERATED FILES
+# ============================================================
+
+# Uncomment ONLY if these directories are generated
+# automatically by your build/codegen process.
+#
+# src/generated/
+# generated/
+
+
+# ============================================================
+# LOCAL DEVELOPMENT
+# ============================================================
+
+.local/
+.localhost/
+
+
+# ============================================================
+# CRASH / DEBUG ARTIFACTS
+# ============================================================
+
+*.stacktrace
+*.dump
+*.core

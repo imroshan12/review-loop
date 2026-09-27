@@ -1,0 +1,32 @@
+# Copy to .dev.vars for local development. In production, set each with:
+#   npx wrangler secret put NAME
+
+# 32 random bytes, base64. Generate with: openssl rand -base64 32
+# Encrypts store API keys and webhook URLs at rest. To rotate it, see "Rotating the encryption key" in the README:
+# the old key goes in ENCRYPTION_KEY_PREVIOUS until the founder dashboard says every secret has moved.
+ENCRYPTION_KEY=
+# ENCRYPTION_KEY_PREVIOUS=
+
+# GitHub OAuth app (github.com/settings/developers). Callback URL: <APP_URL>/auth/github/callback
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+
+# Claude API key for AI reply drafts (console.anthropic.com)
+ANTHROPIC_API_KEY=
+
+# Dodo Payments (dodopayments.com): API key, webhook secret (whsec_...), and the $9/month product id
+DODO_API_KEY=
+DODO_WEBHOOK_SECRET=
+DODO_PRODUCT_ID=
+
+# Optional: email alerts through Resend (resend.com). Leave empty to use Slack/Discord alerts only.
+RESEND_API_KEY=
+EMAIL_FROM="ReviewLoop <alerts@yourdomain.com>"
+
+# Local only: the sign-in button signs you in as a local test user, no GitHub app needed.
+# Ignored unless the app runs on http://localhost, but never set it in production anyway.
+DEV_LOGIN=true
+
+# Local only: lets the dev account open the founder dashboard at /admin.
+# In production, set ADMIN_GITHUB_IDS in wrangler.jsonc to your numeric GitHub id instead.
+ADMIN_GITHUB_LOGINS=dev

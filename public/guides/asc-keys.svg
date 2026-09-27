@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 310" role="img" aria-labelledby="title desc">
+  <title id="title">App Store Connect API keys page</title>
+  <desc id="desc">On the Team Keys tab, the Issuer ID is at the top. The new key's row shows its Key ID and a one-time Download link.</desc>
+  <style>
+    text { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .bg { fill: #f3f3f0; } .panel { fill: #ffffff; stroke: #d6d6d0; } .chip { fill: #eef0ff; } .line { stroke: #e3e3de; }
+    .text { fill: #1c1c21; } .muted { fill: #7c7c84; } .link { fill: #2f6fdc; } .accent { stroke: #4f46e5; }
+    .hl { fill: none; stroke: #4f46e5; stroke-width: 2.5; } .mark { fill: #4f46e5; } .marktext { fill: #ffffff; font-weight: 700; }
+    .btn { fill: #4f46e5; } .btntext { fill: #ffffff; font-weight: 700; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #16161a; } .panel { fill: #202026; stroke: #35353d; } .chip { fill: #2a2850; } .line { stroke: #30303a; }
+      .text { fill: #ececf0; } .muted { fill: #9a9aa3; } .link { fill: #7fb0ff; } .accent { stroke: #8f89ff; }
+      .hl { stroke: #8f89ff; } .mark, .btn { fill: #7c74ff; }
+    }
+  </style>
+  <rect class="bg" width="640" height="310" rx="12"/>
+
+  <rect class="panel" x="16" y="16" width="608" height="40" rx="8"/>
+  <text class="text" x="32" y="41" font-size="14" font-weight="600">Users and Access</text>
+  <text class="muted" x="190" y="41" font-size="13">People</text>
+  <text class="muted" x="250" y="41" font-size="13">Sandbox</text>
+  <text class="text" x="318" y="41" font-size="13" font-weight="600">Integrations</text>
+  <line class="accent" x1="318" y1="51" x2="394" y2="51" stroke-width="2.5"/>
+
+  <rect class="panel" x="16" y="64" width="150" height="222" rx="8"/>
+  <rect class="chip" x="24" y="74" width="134" height="26" rx="6"/>
+  <text class="text" x="32" y="91" font-size="11.5" font-weight="600">App Store Connect API</text>
+  <text class="muted" x="32" y="120" font-size="11.5">In-App Purchase</text>
+
+  <rect class="panel" x="176" y="64" width="448" height="222" rx="8"/>
+  <text class="text" x="192" y="89" font-size="12.5" font-weight="600">Team Keys</text>
+  <line class="accent" x1="192" y1="96" x2="254" y2="96" stroke-width="2.5"/>
+  <text class="muted" x="272" y="89" font-size="12.5">Individual Keys</text>
+
+  <text class="muted" x="192" y="119" font-size="11">Issuer ID</text>
+  <text class="text mono" x="192" y="137" font-size="11.5">57246542-96fe-1a63-e053-0824d011072a</text>
+  <text class="link" x="466" y="137" font-size="11.5">Copy</text>
+  <rect class="hl" x="186" y="123" width="268" height="21" rx="5"/>
+  <circle class="mark" cx="518" cy="133" r="11"/>
+  <text class="marktext" x="518" y="137.5" font-size="11.5" text-anchor="middle">1</text>
+
+  <text class="text" x="192" y="172" font-size="13" font-weight="600">Active</text>
+  <circle class="btn" cx="250" cy="167.5" r="9"/>
+  <text class="btntext" x="250" y="172" font-size="13" text-anchor="middle">+</text>
+
+  <text class="muted" x="192" y="198" font-size="10" letter-spacing=".5">NAME</text>
+  <text class="muted" x="300" y="198" font-size="10" letter-spacing=".5">KEY ID</text>
+  <text class="muted" x="410" y="198" font-size="10" letter-spacing=".5">ACCESS</text>
+  <line class="line" x1="188" y1="206" x2="612" y2="206"/>
+  <text class="text" x="192" y="226" font-size="12">ReviewLoop</text>
+  <text class="text mono" x="300" y="226" font-size="12">2X9R4HXF34</text>
+  <text class="text" x="410" y="226" font-size="12">Customer Support</text>
+  <text class="link" x="548" y="226" font-size="12">Download</text>
+  <line class="line" x1="188" y1="238" x2="612" y2="238"/>
+  <rect class="hl" x="294" y="211" width="92" height="22" rx="5"/>
+  <circle class="mark" cx="340" cy="258" r="11"/>
+  <text class="marktext" x="340" y="262.5" font-size="11.5" text-anchor="middle">2</text>
+  <rect class="hl" x="542" y="211" width="66" height="22" rx="5"/>
+  <circle class="mark" cx="575" cy="258" r="11"/>
+  <text class="marktext" x="575" y="262.5" font-size="11.5" text-anchor="middle">3</text>
+
+  <text class="muted" x="16" y="302" font-size="11.5">1 Issuer ID   ·   2 Key ID   ·   3 Download the .p8 file (Apple allows this only once)</text>
+</svg>

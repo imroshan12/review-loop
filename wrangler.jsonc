@@ -1,0 +1,60 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "reviewloop",
+  "main": "src/index.tsx",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "assets": { "directory": "./public" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "reviewloop",
+      // Replace with the id printed by `npx wrangler d1 create reviewloop` before deploying.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // Per-location request limits. Periods must be 10 or 60 seconds; namespace ids must be unique in your account.
+  "ratelimits": [
+    { "name": "RL_AUTH", "namespace_id": "1001", "simple": { "limit": 20, "period": 60 } },
+    { "name": "RL_WRITE", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } },
+    { "name": "RL_AI", "namespace_id": "1003", "simple": { "limit": 12, "period": 60 } },
+    { "name": "RL_PUBLIC", "namespace_id": "1004", "simple": { "limit": 120, "period": 60 } },
+    { "name": "RL_WEBHOOK", "namespace_id": "1005", "simple": { "limit": 60, "period": 60 } }
+  ],
+  // Checks every connected store for new reviews and shipped releases.
+  "triggers": { "crons": ["*/30 * * * *"] },
+  "vars": {
+    "APP_NAME": "ReviewLoop",
+    "APP_URL": "http://localhost:8787",
+    "SUPPORT_EMAIL": "support@example.com",
+    // Change to claude-haiku-4-5 to cut AI cost roughly 5x (see README).
+    "AI_MODEL": "claude-opus-5",
+    // Plans. Each store listing counts as one app, so Plus covers one app on both stores.
+    "FREE_APP_LIMIT": "1",
+    "FREE_AI_DRAFTS_PER_MONTH": "20",
+    "PLUS_APP_LIMIT": "2",
+    "PLUS_AI_DRAFTS_PER_MONTH": "100",
+    "PRO_AI_DRAFTS_PER_MONTH": "500",
+    // Spending cap per UTC day, across all users. At ~₹1 a draft on Opus 5,
+    // 100 free drafts a day caps free-user AI cost at about ₹3,000 a month.
+    "FREE_AI_DAILY_CAP": "100",
+    "AI_DAILY_CAP": "1000",
+    // Shown on the pages and used for the dashboard's revenue. Actual prices are set on the Dodo products.
+    "PLUS_PRICE_LABEL": "$5/month",
+    "PLUS_PRICE_USD": "5",
+    "PRO_PRICE_LABEL": "$10/month",
+    "PRO_PRICE_USD": "10",
+    // Who can open the founder dashboard at /admin. Prefer your numeric GitHub id (shown on /admin):
+    // unlike a username, nobody else can claim it if you rename your account.
+    "ADMIN_GITHUB_IDS": "",
+    "ADMIN_GITHUB_LOGINS": "",
+    // Peer benchmarks stay hidden until this many apps contribute, so no app can be singled out.
+    "BENCHMARK_MIN_APPS": "10",
+    // Days after telling reviewers a fix is coming before the promise tracker reminds you.
+    "PROMISE_DAYS": "14",
+    "DODO_MODE": "test",
+    "DEV_LOGIN": "false"
+  }
+}
