@@ -11,13 +11,18 @@
     "db:migrate:local": "wrangler d1 migrations apply reviewloop --local",
     "db:migrate:remote": "wrangler d1 migrations apply reviewloop --remote",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "icons": "node scripts/icons.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",
     "hono": "^4.13.9"
   },
   "devDependencies": {
+    "@phosphor-icons/core": "^2.1.1",
+    "geist": "^1.7.2",
+    "puppeteer-core": "^25.12.0",
     "typescript": "~5.9.3",
     "vitest": "^5.0.2",
     "wrangler": "^4.142.0"

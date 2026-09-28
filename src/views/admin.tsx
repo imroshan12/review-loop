@@ -4,9 +4,15 @@ import type { Bindings, UserRow } from "../env";
 import { relativeTime } from "../lib/util";
 import { Layout } from "./layout";
 
-// From the launch plan: about 14 subscribers at $9 net roughly ₹10,000 a month after fees.
-const GOAL_SUBSCRIBERS = 14;
-const DODO_FEE_SHARE = 0.104;
+// The goal from the launch plan: ₹10,000 a month after fees, at roughly ₹88 to the dollar.
+const GOAL_INR = 10_000;
+const INR_PER_USD = 88;
+const GOAL_NET_USD = GOAL_INR / INR_PER_USD;
+
+/** Dodo's fee on an international subscription payment: 4% + 40¢, plus 1.5% for international cards and 0.5% for subscriptions. */
+function dodoFee(priceUsd: number): number {
+  return priceUsd * 0.06 + 0.4;
+}
 
 interface AdminProps {
   env: Bindings;
@@ -19,7 +25,7 @@ interface AdminProps {
     model: string;
     monthCostUsd: number | null;
   };
-  priceUsd: number;
+  prices: { plus: number; pro: number };
   /** False when access still relies on usernames (ADMIN_GITHUB_LOGINS) instead of numeric ids. */
   lockedToId: boolean;
   /** Set while ENCRYPTION_KEY_PREVIOUS is configured. */
@@ -42,9 +48,10 @@ function usd(amount: number): string {
   return amount < 10 ? `$${amount.toFixed(2)}` : `$${Math.round(amount).toLocaleString("en-US")}`;
 }
 
-export const AdminPage: FC<AdminProps> = ({ env, user, metrics, ai, priceUsd, lockedToId, rotation }) => {
+export const AdminPage: FC<AdminProps> = ({ env, user, metrics, ai, prices, lockedToId, rotation }) => {
   const { users, activity, funnel } = metrics;
-  const mrr = users.pro * priceUsd;
+  const mrr = users.plus * prices.plus + users.pro * prices.pro;
+  const net = users.plus * (prices.plus - dodoFee(prices.plus)) + users.pro * (prices.pro - dodoFee(prices.pro));
   const funnelRows: Array<[string, number]> = [
     ["Signed up", funnel.signedUp],
     ["Tried the sample", funnel.triedSample],
@@ -81,9 +88,13 @@ export const AdminPage: FC<AdminProps> = ({ env, user, metrics, ai, priceUsd, lo
 
       <h2>Revenue</h2>
       <div class="stats">
-        <Stat label="Paying developers" value={users.pro} sub={`Goal: ${GOAL_SUBSCRIBERS} (≈ ₹10,000/month)`} />
-        <Stat label="Monthly revenue" value={usd(mrr)} sub={`≈ ${usd(mrr * (1 - DODO_FEE_SHARE))} after Dodo fees`} />
-        <Stat label="Goal progress" value={percent(users.pro, GOAL_SUBSCRIBERS)} />
+        <Stat label="Paying developers" value={users.plus + users.pro} sub={`${users.plus} Plus · ${users.pro} Pro`} />
+        <Stat label="Monthly revenue" value={usd(mrr)} sub={`≈ ${usd(net)} after Dodo fees`} />
+        <Stat
+          label="Goal progress"
+          value={percent(net, GOAL_NET_USD)}
+          sub={`Goal: ₹${GOAL_INR.toLocaleString("en-IN")}/month ≈ ${usd(GOAL_NET_USD)} after fees`}
+        />
       </div>
 
       <h2>Users</h2>
@@ -185,7 +196,7 @@ export const AdminPage: FC<AdminProps> = ({ env, user, metrics, ai, priceUsd, lo
                 </a>
               </td>
               <td>{relativeTime(row.created_at)}</td>
-              <td>{row.plan === "pro" ? "Pro" : "Free"}</td>
+              <td>{row.plan === "pro" ? "Pro" : row.plan === "plus" ? "Plus" : "Free"}</td>
               <td>{row.connections}</td>
               <td>{row.replies}</td>
             </tr>

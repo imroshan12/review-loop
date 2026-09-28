@@ -7,6 +7,7 @@ export type AuditEvent =
   | "store_removed"
   | "alert_webhooks_changed"
   | "plan_changed"
+  | "plan_change_requested"
   | "public_log_enabled"
   | "public_log_disabled"
   | "admin_opened";

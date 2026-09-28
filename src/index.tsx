@@ -16,7 +16,7 @@ import {
 } from "./auth";
 import * as db from "./db";
 import type { Bindings, InboxReview, UserRow } from "./env";
-import { envNumber, guidePath, isAdmin, isPro } from "./env";
+import { guidePath, isAdmin, planDetails, userPlan } from "./env";
 import { allowRequest, type Bucket } from "./lib/ratelimit";
 import { encryptOptional } from "./lib/secrets";
 import { contentSecurityPolicy, describeUserAgent, hashIp, safeNextPath } from "./lib/security";
@@ -25,7 +25,15 @@ import { logEvent, recentEvents, type AuditEvent } from "./queries/audit";
 import { appLoopMetrics } from "./queries/insights";
 import * as issuesDb from "./queries/issues";
 import { estimateCostUsd } from "./services/ai";
-import { billingConfigured, createCheckout, createPortalLink, handleBillingWebhook } from "./services/billing";
+import {
+  billingConfigured,
+  cancelScheduledChange,
+  changePlan,
+  createCheckout,
+  createPortalLink,
+  handleBillingWebhook,
+  isPaidPlan,
+} from "./services/billing";
 import { connectApple, connectDemo, connectGoogle, syncNow, type ConnectResult } from "./services/connect";
 import { cachedBenchmarks, forecastBasisFor, refreshBenchmarksIfStale, summarize } from "./services/insights";
 import { addReviewsToIssue, linkReviewToIssue, similarReviews, unlinkReview, VERSION_PATTERN, whatsNewText } from "./services/issues";
@@ -183,7 +191,10 @@ function flashFrom(c: AppContext): Flash | null {
 }
 
 function redirectWith(c: AppContext, path: string, kind: "ok" | "err", text: string) {
-  return c.redirect(`${path}${path.includes("?") ? "&" : "?"}${kind}=${encodeURIComponent(text)}`, 303);
+  // The message goes in the query string, which must come before any #anchor.
+  const [base, anchor] = path.split("#");
+  const query = `${base.includes("?") ? "&" : "?"}${kind}=${encodeURIComponent(text)}`;
+  return c.redirect(`${base}${query}${anchor ? `#${anchor}` : ""}`, 303);
 }
 
 function requireUser(c: AppContext): UserRow | null {
@@ -582,7 +593,7 @@ app.get("/apps", async (c) => {
   const user = requireUser(c);
   if (!user) return signInFirst(c);
   const apps = await db.listApps(c.env.DB, user.id);
-  return c.html(<AppsPage env={c.env} user={user} flash={flashFrom(c)} apps={apps} limit={envNumber(c.env.FREE_APP_LIMIT, 1)} />);
+  return c.html(<AppsPage env={c.env} user={user} flash={flashFrom(c)} apps={apps} />);
 });
 
 app.post("/apps/:id/toggle", async (c) => {
@@ -592,7 +603,13 @@ app.post("/apps/:id/toggle", async (c) => {
   if (!target) return redirectWith(c, "/apps", "err", "That app no longer exists.");
   const enable = field(await c.req.parseBody(), "enabled") === "1";
   if (enable && target.store !== "demo" && (await db.countEnabledApps(c.env.DB, user.id)) >= appLimitFor(c.env, user)) {
-    return redirectWith(c, "/apps", "err", "The Free plan covers 1 app. Upgrade to Pro to track more.");
+    const plan = userPlan(c.env, user);
+    return redirectWith(
+      c,
+      "/apps",
+      "err",
+      `Your ${plan.name} plan covers ${plan.apps} app${plan.apps === 1 ? "" : "s"}. Stop tracking one, or upgrade in Settings to track more.`,
+    );
   }
   await db.setAppEnabled(c.env.DB, user.id, target.id, enable);
   return redirectWith(c, "/apps", "ok", enable ? `Tracking ${target.name}.` : `Stopped tracking ${target.name}.`);
@@ -770,7 +787,7 @@ app.post("/settings", async (c) => {
     email_alerts: field(form, "email_alerts") === "1" ? 1 : 0,
     slack_webhook: clear ? null : slack ? await encryptOptional(c.env.ENCRYPTION_KEY, slack) : current.slack_webhook,
     discord_webhook: clear ? null : discord ? await encryptOptional(c.env.ENCRYPTION_KEY, discord) : current.discord_webhook,
-    auto_followup: isPro(user) && field(form, "auto_followup") === "1" ? 1 : 0,
+    auto_followup: userPlan(c.env, user).autoFollowup && field(form, "auto_followup") === "1" ? 1 : 0,
   });
 
   // Alerts go wherever these URLs point, so changes to them belong in the security log.
@@ -822,7 +839,7 @@ app.get("/admin", async (c) => {
         model,
         monthCostUsd: estimateCostUsd(model, monthUsage.input_tokens, monthUsage.output_tokens),
       }}
-      priceUsd={envNumber(c.env.PRO_PRICE_USD, 9)}
+      prices={{ plus: planDetails(c.env, "plus").priceUsd, pro: planDetails(c.env, "pro").priceUsd }}
       lockedToId={Boolean(c.env.ADMIN_GITHUB_IDS?.trim())}
       rotation={rotation}
     />,
@@ -834,10 +851,50 @@ app.get("/admin", async (c) => {
 app.post("/billing/checkout", async (c) => {
   const user = requireUser(c);
   if (!user) return c.redirect("/login", 303);
+  const plan = field(await c.req.parseBody(), "plan");
+  if (!isPaidPlan(plan)) return redirectWith(c, "/settings#plan", "err", "Choose Plus or Pro.");
   try {
-    return c.redirect(await createCheckout(c.env, user), 303);
+    return c.redirect(await createCheckout(c.env, user, plan), 303);
   } catch (error) {
-    return redirectWith(c, "/settings", "err", errorMessage(error));
+    return redirectWith(c, "/settings#plan", "err", errorMessage(error));
+  }
+});
+
+/** Subscribers switch plans on their existing subscription, so they're never billed twice. */
+app.post("/billing/change", async (c) => {
+  const user = requireUser(c);
+  if (!user) return c.redirect("/login", 303);
+  const target = field(await c.req.parseBody(), "plan");
+  if (!isPaidPlan(target)) return redirectWith(c, "/settings#plan", "err", "Choose Plus or Pro.");
+  const current = userPlan(c.env, user);
+  const next = planDetails(c.env, target);
+  try {
+    const result = await changePlan(c.env, user, target);
+    const when = result === "upgraded" ? "now" : "next billing date";
+    await audit(c, user.id, "plan_change_requested", `${current.name} to ${next.name} (${when})`);
+    if (result === "scheduled") {
+      await db.setScheduledPlan(c.env.DB, user.id, target);
+      const date = user.plan_renews_at ? user.plan_renews_at.slice(0, 10) : "your next billing date";
+      return redirectWith(c, "/settings#plan", "ok", `You'll move to ${next.name} on ${date}. You keep ${current.name} until then.`);
+    }
+    return redirectWith(c, "/settings#plan", "ok", `Upgrading to ${next.name}. It switches on as soon as the payment goes through, usually within a minute.`);
+  } catch (error) {
+    return redirectWith(c, "/settings#plan", "err", errorMessage(error));
+  }
+});
+
+app.post("/billing/keep", async (c) => {
+  const user = requireUser(c);
+  if (!user) return c.redirect("/login", 303);
+  const current = userPlan(c.env, user);
+  if (!user.plan_scheduled) return redirectWith(c, "/settings#plan", "ok", `You're on ${current.name}, with no change booked.`);
+  try {
+    await cancelScheduledChange(c.env, user);
+    await db.setScheduledPlan(c.env.DB, user.id, null);
+    await audit(c, user.id, "plan_change_requested", `Kept ${current.name}`);
+    return redirectWith(c, "/settings#plan", "ok", `You're staying on ${current.name}.`);
+  } catch (error) {
+    return redirectWith(c, "/settings#plan", "err", errorMessage(error));
   }
 });
 
@@ -856,8 +913,8 @@ app.get("/billing/return", (c) =>
     <MessagePage
       env={c.env}
       user={c.get("user")}
-      title="Thanks for upgrading"
-      message="Your payment is being confirmed. Pro features switch on within a minute; refresh Settings if they haven't yet."
+      title="Thanks for subscribing"
+      message="Your payment is being confirmed. Your new plan switches on within a minute; refresh Settings if it hasn't yet."
       link={{ href: "/settings", label: "Go to Settings" }}
     />,
   ),

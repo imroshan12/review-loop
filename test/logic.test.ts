@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isPro, replyLimit } from "../src/env";
+import { currentPlan, planDetails, replyLimit, UNLIMITED } from "../src/env";
 import { compareVersions, fitToLimit, maxVersion, relativeTime } from "../src/lib/util";
 import { buildDraftPrompt, templateFollowup } from "../src/services/ai";
 import { parsePackageNames } from "../src/services/connect";
@@ -23,12 +23,21 @@ describe("fitToLimit", () => {
 });
 
 describe("plans", () => {
-  it("keeps Pro through a short grace period after the paid date", () => {
+  it("keeps a paid plan through a short grace period after the paid date", () => {
     const now = Date.parse("2026-09-27T00:00:00Z");
-    expect(isPro({ plan: "pro", plan_renews_at: null }, now)).toBe(true);
-    expect(isPro({ plan: "pro", plan_renews_at: "2026-09-26T00:00:00Z" }, now)).toBe(true);
-    expect(isPro({ plan: "pro", plan_renews_at: "2026-09-01T00:00:00Z" }, now)).toBe(false);
-    expect(isPro({ plan: "free", plan_renews_at: null }, now)).toBe(false);
+    expect(currentPlan({ plan: "pro", plan_renews_at: null }, now)).toBe("pro");
+    expect(currentPlan({ plan: "plus", plan_renews_at: "2026-09-26T00:00:00Z" }, now)).toBe("plus");
+    expect(currentPlan({ plan: "pro", plan_renews_at: "2026-09-01T00:00:00Z" }, now)).toBe("free");
+    expect(currentPlan({ plan: "free", plan_renews_at: null }, now)).toBe("free");
+    expect(currentPlan({ plan: "gold" as never, plan_renews_at: null }, now)).toBe("free");
+  });
+
+  it("gives Plus one app on both stores and keeps automatic follow-ups for Pro", () => {
+    const env = {};
+    expect(planDetails(env, "free")).toMatchObject({ name: "Free", apps: 1, draftsPerMonth: 20, autoFollowup: false, priceUsd: 0 });
+    expect(planDetails(env, "plus")).toMatchObject({ name: "Plus", apps: 2, draftsPerMonth: 100, autoFollowup: false, priceUsd: 5 });
+    expect(planDetails(env, "pro")).toMatchObject({ name: "Pro", apps: UNLIMITED, draftsPerMonth: 500, autoFollowup: true, priceUsd: 10 });
+    expect(planDetails({ PLUS_APP_LIMIT: "3", PLUS_PRICE_LABEL: "$6/month" }, "plus")).toMatchObject({ apps: 3, priceLabel: "$6/month" });
   });
 });
 

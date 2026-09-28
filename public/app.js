@@ -178,6 +178,39 @@
     if (form.dataset.confirm && !window.confirm(form.dataset.confirm)) event.preventDefault();
   });
 
+  // Landing page tour: the steps work as tabs over one screenshot slot (ARIA tabs pattern).
+  for (const tour of document.querySelectorAll("[data-tour]")) {
+    const tabs = [...tour.querySelectorAll('[role="tab"]')];
+    const panels = tabs.map((tab) => document.getElementById(tab.getAttribute("aria-controls")));
+    const select = (index, focus) => {
+      tabs.forEach((tab, i) => {
+        const active = i === index;
+        tab.classList.toggle("is-active", active);
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        panels[i].classList.toggle("is-active", active);
+      });
+      if (focus) tabs[index].focus();
+    };
+    tour.addEventListener("click", (event) => {
+      const tab = event.target.closest('[role="tab"]');
+      if (tab) select(tabs.indexOf(tab), false);
+    });
+    tour.addEventListener("keydown", (event) => {
+      const current = tabs.indexOf(document.activeElement);
+      if (current === -1) return;
+      const keys = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
+      if (event.key in keys) {
+        event.preventDefault();
+        select((current + keys[event.key] + tabs.length) % tabs.length, true);
+      } else if (event.key === "Home" || event.key === "End") {
+        event.preventDefault();
+        select(event.key === "Home" ? 0 : tabs.length - 1, true);
+      }
+    });
+    tour.classList.add("is-ready");
+  }
+
   // Drop the flash message from the URL so a refresh doesn't repeat it.
   const url = new URL(window.location.href);
   if (url.searchParams.has("ok") || url.searchParams.has("err")) {

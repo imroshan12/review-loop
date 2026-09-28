@@ -14,10 +14,12 @@ GITHUB_CLIENT_SECRET=
 # Claude API key for AI reply drafts (console.anthropic.com)
 ANTHROPIC_API_KEY=
 
-# Dodo Payments (dodopayments.com): API key, webhook secret (whsec_...), and the $9/month product id
+# Dodo Payments (dodopayments.com): API key, webhook secret (whsec_...), and the product ids of
+# the $5/month Plus and $10/month Pro subscriptions
 DODO_API_KEY=
 DODO_WEBHOOK_SECRET=
-DODO_PRODUCT_ID=
+DODO_PLUS_PRODUCT_ID=
+DODO_PRO_PRODUCT_ID=
 
 # Optional: email alerts through Resend (resend.com). Leave empty to use Slack/Discord alerts only.
 RESEND_API_KEY=

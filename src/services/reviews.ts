@@ -1,6 +1,6 @@
 import * as db from "../db";
 import type { AppRow, Bindings, ConnectionRow, InboxReview, ReviewRow, UserRow } from "../env";
-import { envNumber, isPro, replyLimit } from "../env";
+import { currentPlan, envNumber, planDetails, replyLimit, userPlan } from "../env";
 import { checkReplySafety } from "../lib/safety";
 import { encryptJson, keyring, openSealed } from "../lib/secrets";
 import { compareVersions, maxVersion, nowIso } from "../lib/util";
@@ -42,11 +42,25 @@ export async function clientFor(env: Bindings, connection: ConnectionRow, fetche
 }
 
 export function appLimitFor(env: Bindings, user: Pick<UserRow, "plan" | "plan_renews_at">): number {
-  return isPro(user) ? Number.MAX_SAFE_INTEGER : envNumber(env.FREE_APP_LIMIT, 1);
+  return userPlan(env, user).apps;
 }
 
 export function draftLimitFor(env: Bindings, user: Pick<UserRow, "plan" | "plan_renews_at">): number {
-  return isPro(user) ? envNumber(env.PRO_AI_DRAFTS_PER_MONTH, 500) : envNumber(env.FREE_AI_DRAFTS_PER_MONTH, 20);
+  return userPlan(env, user).draftsPerMonth;
+}
+
+/** What to say when a plan's monthly AI drafts are used up, pointing at the plan that has more. */
+export function draftLimitMessage(env: Bindings, user: Pick<UserRow, "plan" | "plan_renews_at">): string {
+  const plan = userPlan(env, user);
+  const plus = planDetails(env, "plus");
+  const pro = planDetails(env, "pro");
+  if (plan.plan === "free") {
+    return `You've used your ${plan.draftsPerMonth} free AI drafts this month. Plus includes ${plus.draftsPerMonth} a month and Pro ${pro.draftsPerMonth}.`;
+  }
+  if (plan.plan === "plus") {
+    return `You've used all ${plan.draftsPerMonth} AI drafts this month. They reset on the 1st, or Pro includes ${pro.draftsPerMonth} a month.`;
+  }
+  return `You've used all ${plan.draftsPerMonth} AI drafts this month. They reset on the 1st.`;
 }
 
 export function dailyAiCaps(env: Bindings): { free: number; total: number } {
@@ -249,23 +263,16 @@ export async function draftForReview(
 ): Promise<DraftResult> {
   const used = await db.aiDraftsThisMonth(env.DB, user.id);
   const limit = draftLimitFor(env, user);
-  if (used >= limit) {
-    throw new UserFacingError(
-      isPro(user)
-        ? `You've used all ${limit} AI drafts this month. They reset on the 1st.`
-        : `You've used your ${limit} free AI drafts this month. Upgrade to Pro for ${envNumber(env.PRO_AI_DRAFTS_PER_MONTH, 500)} a month.`,
-      402,
-    );
-  }
+  if (used >= limit) throw new UserFacingError(draftLimitMessage(env, user), 402);
   if (!env.ANTHROPIC_API_KEY) throw new UserFacingError("AI drafts aren't set up yet (ANTHROPIC_API_KEY is missing).", 502);
 
   // The daily cap protects the AI bill from bursts, such as many new accounts in one day.
-  const free = !isPro(user);
+  const free = currentPlan(user) === "free";
   if (!(await db.reserveAiDraft(env.DB, free, dailyAiCaps(env)))) {
     console.warn(`AI daily cap reached (${free ? "free" : "all"} drafts)`);
     throw new UserFacingError(
       free
-        ? "Free AI drafts are paused until midnight UTC because today's free allowance is used up. You can still write replies yourself, or upgrade to Pro."
+        ? "Free AI drafts are paused until midnight UTC because today's free allowance is used up. You can still write replies yourself, or upgrade to Plus or Pro."
         : "AI drafts are paused until midnight UTC because today's safety limit was reached. You can still write replies yourself.",
       429,
     );
@@ -437,7 +444,8 @@ export async function runScheduledWork(env: Bindings): Promise<void> {
     if (!user) continue;
     const settings = await db.getSettings(env.DB, userId);
 
-    if (settings.auto_followup) {
+    // The setting outlives the plan: someone who moved off Pro keeps it, so check what they pay for now.
+    if (settings.auto_followup && userPlan(env, user).autoFollowup) {
       for (const app of await db.listApps(env.DB, userId)) {
         if (!app.enabled || budget.remaining < 3) continue;
         const ready = await db.followupsReady(env.DB, app.id);

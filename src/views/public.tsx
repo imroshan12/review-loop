@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import type { AppRow, Bindings } from "../env";
 import type { PublicFix } from "../queries/issues";
 import { Layout } from "./layout";
+import { Icon } from "./icon";
 
 function monthDay(iso: string | null): string {
   if (!iso) return "";
@@ -22,9 +23,9 @@ export const PublicFixLogPage: FC<{ env: Bindings; app: AppRow; fixes: PublicFix
       description={`${fixes.length} problems reported in ${app.name}'s app store reviews, fixed and shipped.`}
     >
       <section class="public-log">
-        <p class="lp-eyebrow">Fixed from user reviews</p>
+        <p class="eyebrow">Fixed from user reviews</p>
         <h1>{app.name}</h1>
-        <p class="lp-sub">
+        <p class="public-log-lede">
           Every problem below was reported in an App Store or Google Play review, then fixed and shipped in an update.
         </p>
         <div class="stats">
@@ -48,10 +49,13 @@ export const PublicFixLogPage: FC<{ env: Bindings; app: AppRow; fixes: PublicFix
           <ol class="fix-list">
             {fixes.map((fix) => (
               <li>
-                <span class="fix-title">{fix.title}</span>
-                <span class="fix-meta">
-                  Fixed in v{fix.shipped_version} · {monthDay(fix.shipped_at)} · reported by {fix.reports}
-                  {fix.raised ? ` · ${fix.raised} raised their rating` : ""}
+                <Icon name="check-circle" size={20} />
+                <span>
+                  <span class="fix-title">{fix.title}</span>
+                  <span class="fix-meta">
+                    Fixed in v{fix.shipped_version} on {monthDay(fix.shipped_at)}. Reported by {fix.reports}
+                    {fix.raised ? `, and ${fix.raised} raised their rating.` : "."}
+                  </span>
                 </span>
               </li>
             ))}

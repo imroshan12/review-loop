@@ -1,6 +1,6 @@
 import type { FC } from "hono/jsx";
 import type { AppRow, Bindings, UserRow } from "../env";
-import { isPro } from "../env";
+import { UNLIMITED, userPlan } from "../env";
 import { Layout, type Flash } from "./layout";
 
 const STORE_LABEL = { apple: "App Store", google: "Google Play", demo: "Sample" } as const;
@@ -40,15 +40,9 @@ const EmbedCodes: FC<{ env: Bindings; app: AppRow }> = ({ env, app }) => {
   );
 };
 
-export const AppsPage: FC<{ env: Bindings; user: UserRow; flash?: Flash | null; apps: AppRow[]; limit: number }> = ({
-  env,
-  user,
-  flash,
-  apps,
-  limit,
-}) => {
+export const AppsPage: FC<{ env: Bindings; user: UserRow; flash?: Flash | null; apps: AppRow[] }> = ({ env, user, flash, apps }) => {
   const enabledReal = apps.filter((app) => app.enabled && app.store !== "demo").length;
-  const pro = isPro(user);
+  const plan = userPlan(env, user);
   const publicApps = apps.filter((app) => app.public_log && app.public_slug);
   return (
     <Layout env={env} title="Apps" user={user} active="apps" flash={flash}>
@@ -56,13 +50,15 @@ export const AppsPage: FC<{ env: Bindings; user: UserRow; flash?: Flash | null; 
         <div>
           <h1>Apps</h1>
           <p class="muted">
-            {pro ? "Pro covers every app you connect." : `The Free plan covers ${limit} app. Sample apps don't count.`}
+            {plan.apps === UNLIMITED
+              ? `${plan.name} covers every app you connect.`
+              : `Your ${plan.name} plan covers ${plan.apps} app${plan.apps === 1 ? "" : "s"}. An app on both stores counts as two; sample apps don't count.`}
           </p>
         </div>
-        {!pro ? (
-          <form method="post" action="/billing/checkout" class="inline">
-            <button type="submit" class="button primary">Upgrade to Pro · {env.PRO_PRICE_LABEL}</button>
-          </form>
+        {plan.plan !== "pro" ? (
+          <a class="button primary" href="/settings#plan">
+            {plan.plan === "free" ? "Compare plans" : "Upgrade to Pro"}
+          </a>
         ) : null}
       </div>
 
@@ -84,7 +80,7 @@ export const AppsPage: FC<{ env: Bindings; user: UserRow; flash?: Flash | null; 
           </thead>
           <tbody>
             {apps.map((app) => {
-              const blocked = !app.enabled && app.store !== "demo" && !pro && enabledReal >= limit;
+              const blocked = !app.enabled && app.store !== "demo" && enabledReal >= plan.apps;
               return (
                 <tr>
                   <td>{app.name}</td>
@@ -95,7 +91,7 @@ export const AppsPage: FC<{ env: Bindings; user: UserRow; flash?: Flash | null; 
                     <form method="post" action={`/apps/${app.id}/toggle`} class="inline">
                       <input type="hidden" name="enabled" value={app.enabled ? "0" : "1"} />
                       <button type="submit" class={`button small ${app.enabled ? "" : "primary"}`}>
-                        {app.enabled ? "Stop tracking" : blocked ? "Track (Pro)" : "Track"}
+                        {app.enabled ? "Stop tracking" : blocked ? "Track (upgrade)" : "Track"}
                       </button>
                     </form>
                   </td>

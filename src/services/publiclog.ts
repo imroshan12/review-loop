@@ -28,7 +28,7 @@ function textWidth(text: string): number {
 }
 
 /** A shields.io-style badge: "fixed from reviews | 12 issues". Text is escaped; no scripts or links inside. */
-export function badgeSvg(label: string, value: string, color = "#4f46e5"): string {
+export function badgeSvg(label: string, value: string, color = "#9a5b06"): string {
   const left = textWidth(label) + 14;
   const right = textWidth(value) + 14;
   const width = left + right;

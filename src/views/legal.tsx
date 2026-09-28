@@ -44,7 +44,10 @@ export const TermsPage: FC<{ env: Bindings; user: UserRow | null }> = ({ env, us
         <li>You're responsible for the replies you send and for following App Store and Google Play guidelines.</li>
         <li>Only connect store accounts you're authorized to manage.</li>
         <li>AI drafts can be wrong. Read them before sending, or leave automatic follow-ups off.</li>
-        <li>Pro is billed monthly and renews until cancelled. You can cancel anytime from Settings.</li>
+        <li>
+          Plus and Pro are billed monthly and renew until cancelled. You can switch plans or cancel anytime from Settings. Upgrades
+          start right away and are charged the difference for the current month; downgrades start at your next billing date.
+        </li>
         <li>We may suspend accounts that abuse the service or the stores' APIs.</li>
         <li>The service is provided as is, without warranties, and our liability is limited to the fees you paid in the last three months.</li>
       </ul>
@@ -61,8 +64,8 @@ export const RefundsPage: FC<{ env: Bindings; user: UserRow | null }> = ({ env, 
       <h1>Refund policy</h1>
       <p>
         If {env.APP_NAME} doesn't work for you, email <a href={`mailto:${env.SUPPORT_EMAIL}`}>{env.SUPPORT_EMAIL}</a> within 14
-        days of your first payment for a full refund. After that, cancel anytime and you keep Pro until the end of the period you
-        paid for.
+        days of your first payment for a full refund. After that, cancel anytime and you keep your plan until the end of the period
+        you paid for.
       </p>
     </article>
   </Layout>

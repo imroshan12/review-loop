@@ -25,7 +25,7 @@ What sets it apart from other review tools:
 | Domain | Optional. Start on `reviewloop.<you>.workers.dev`; a domain is roughly ₹800–1,000/year. |
 | GitHub sign-in | Free |
 | Claude API | Pay per use. With `claude-opus-5` at low effort a draft costs roughly $0.01–0.02 (about ₹1). Setting `AI_MODEL` to `claude-haiku-4-5` cuts that about 5x (test a few drafts after switching). Daily caps bound the bill: with the defaults, free users can't cost more than about ₹3,000 a month. |
-| Dodo Payments | About 10% of a $9 international subscription (4% + 40¢, +1.5% international card, +0.5% subscription). No monthly fee. |
+| Dodo Payments | On international cards, 6% + 40¢ per payment (4% + 40¢, +1.5% international card, +0.5% subscription): about 14% of a $5 Plus payment and 10% of a $10 Pro payment. No monthly fee. |
 | Email alerts (optional) | Resend free tier: 3,000 emails/month. |
 
 ## Run it locally
@@ -78,7 +78,7 @@ To test the cron job locally: `npx wrangler dev --test-scheduled`, then open htt
 3. Create a GitHub OAuth app at github.com/settings/developers. Homepage URL is your `APP_URL`; callback URL is `<APP_URL>/auth/github/callback`.
 
 4. In Dodo Payments:
-   - Create a subscription product "ReviewLoop Pro" at $9/month.
+   - Create two subscription products: "ReviewLoop Plus" at $5/month and "ReviewLoop Pro" at $10/month.
    - Create an API key.
    - Add a webhook pointing to `<APP_URL>/webhooks/dodo` with the `subscription.*` events.
    - Start with `DODO_MODE: "test"`, then switch it to `"live"` once test payments work.
@@ -92,7 +92,8 @@ To test the cron job locally: `npx wrangler dev --test-scheduled`, then open htt
    npx wrangler secret put ANTHROPIC_API_KEY
    npx wrangler secret put DODO_API_KEY
    npx wrangler secret put DODO_WEBHOOK_SECRET
-   npx wrangler secret put DODO_PRODUCT_ID
+   npx wrangler secret put DODO_PLUS_PRODUCT_ID  # the Plus product's id
+   npx wrangler secret put DODO_PRO_PRODUCT_ID   # the Pro product's id
    # optional email alerts
    npx wrangler secret put RESEND_API_KEY
    npx wrangler secret put EMAIL_FROM            # "ReviewLoop <alerts@yourdomain.com>"
@@ -140,6 +141,7 @@ If the key leaked, also ask users to create new store keys: the old ciphertext m
 
 - **Release detection.** App Store versions come from App Store Connect, when the key's role can read them. Google Play versions are inferred from the app version reviewers are on. You can always mark a release by hand.
 - **Issues.** "Mark fix pending" puts a review into an issue: a new one, or an open one from the same app (the most similar is preselected, using keyword overlap, so it costs nothing and works in any language). An issue ships as a unit when a release reaches its target version, or with the next release if it has none.
+- **Plans.** Free, Plus and Pro limits live in one place, `planDetails` in `src/env.ts`. Each store listing counts as one app, so Plus (2 apps) covers one app on both stores. Subscribers switch plans on their existing subscription, never a second one: upgrades start at once and charge the difference (and don't happen if that payment fails); downgrades are booked for the next billing date, shown in Settings with a **Keep** button. The Dodo webhook maps the subscription's product to a plan, ignores products it doesn't know, never lets an old subscription's ending cancel a newer one, and flags a duplicate subscription in the security log.
 - **Follow-ups.** A release turns every review in a shipped issue into a follow-up. The cron job then upgrades the template text to an AI draft within the user's monthly quota. Follow-ups wait for approval unless a Pro user turns on automatic sending, and even then any draft with a link, email address, phone number or rating request is held for a person to read.
 - **Release Guard.** For 72 hours after each release, the cron job compares the share of new 1–2★ reviews with the two weeks before. At least 5 low ratings and twice the usual share sends one alert per release.
 - **Promise tracker.** If reviewers were told a fix is coming (replied to and in an issue) more than `PROMISE_DAYS` ago and it hasn't shipped, the developer gets one reminder.
@@ -153,6 +155,14 @@ If the key leaked, also ask users to create new store keys: the old ciphertext m
 - **Housekeeping.** The cron job deletes expired sessions, webhook records older than 90 days, security log entries older than 180 days, and AI usage rows older than about 13 months.
 
 AI requests use `claude-opus-5` with `fallbacks: "default"` (server-side refusal fallback), low effort and a JSON schema. Refusals and truncated output become a readable message instead of a broken draft.
+
+## Design
+
+- **Tokens** live at the top of `public/app.css`: zinc neutrals with one accent, star amber, in light and dark (the page follows the visitor's system setting). Use `--accent` for fills and `--accent-text` for amber text; the plain accent is too light for text on white. One radius scale: 10px for controls, 16px for containers, fully round for chips.
+- **Type** is Geist and Geist Mono, self-hosted from `public/fonts` (SIL Open Font License, included). Fonts are cached for a year, so give a new font file a new name.
+- **Icons** come from Phosphor. Add a name to the list in `scripts/icons.mjs` and run `npm run icons`, then use `<Icon name="..." />`. Don't draw icons by hand.
+- **Product screenshots** on the landing page are real captures of the app, in both themes, made by `npm run screenshots` with the dev server running (`DEV_LOGIN=true`). It uses an installed Chromium browser (Brave by default; set `CHROME_PATH` for Chrome). Set the sample workspace up to show what each shot needs first; the list of shots and what they show is at the top of `scripts/screenshots.mjs`. Phones get the half-size `-1x.webp` copies through `srcset`.
+- **Motion** is CSS only: the hero enters in reading order, and sections fade in with scroll-driven animations where the browser supports them. Everything is still for visitors who turn on reduced motion.
 
 ## Settings reference
 
@@ -168,11 +178,15 @@ Plain settings live in `vars` in `wrangler.jsonc`; secrets are set with `npx wra
 | `PROMISE_DAYS` | `14` | Days after telling reviewers about a fix before the promise tracker reminds you |
 | `AI_MODEL` | `claude-opus-5` | Model for drafts. `claude-haiku-4-5` is about 5x cheaper |
 | `FREE_AI_DRAFTS_PER_MONTH` | `20` | Monthly drafts per free user |
+| `PLUS_AI_DRAFTS_PER_MONTH` | `100` | Monthly drafts per Plus user |
 | `PRO_AI_DRAFTS_PER_MONTH` | `500` | Monthly drafts per Pro user |
 | `FREE_AI_DAILY_CAP` | `100` | Drafts per UTC day across all free users. `0` turns free drafts off |
 | `AI_DAILY_CAP` | `1000` | Drafts per UTC day across everyone, as a safety limit |
-| `FREE_APP_LIMIT` | `1` | Apps a free user can track |
-| `PRO_PRICE_LABEL` / `PRO_PRICE_USD` | `$9/month` / `9` | Price shown on pages / used for the dashboard's revenue figures |
+| `FREE_APP_LIMIT` | `1` | Store listings a free user can track |
+| `PLUS_APP_LIMIT` | `2` | Store listings a Plus user can track (one app on both stores). Pro is unlimited |
+| `PLUS_PRICE_LABEL` / `PLUS_PRICE_USD` | `$5/month` / `5` | Plus price shown on pages / used for the dashboard's revenue. The price charged is set on the Dodo product |
+| `PRO_PRICE_LABEL` / `PRO_PRICE_USD` | `$10/month` / `10` | Same for Pro |
+| `DODO_PLUS_PRODUCT_ID` / `DODO_PRO_PRODUCT_ID` (secrets) | unset | Dodo product ids. Comma-separate several to recognize, say, a launch-price product too; the first is sold at checkout |
 | `DODO_MODE` | `test` | `test` or `live` Dodo Payments environment |
 | `DEV_LOGIN` | `false` | Local-only test sign-in; ignored unless the app runs on `http://localhost` |
 | `ENCRYPTION_KEY_PREVIOUS` (secret) | unset | Only during a key rotation: the old key, still used to read data until it's re-encrypted |

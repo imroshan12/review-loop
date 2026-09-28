@@ -6,13 +6,13 @@ Nobody can guarantee income. What decides whether you hit ₹10,000/month is how
 
 | | |
 | --- | --- |
-| ₹10,000/month | about $113 at ₹88 per dollar (check today's rate) |
-| Pro price | $9/month |
-| Dodo fee on a $9 international subscription | about 10.4%, so you keep about $8.06 |
-| Subscribers needed | **14**; aim for 16–18 to cover AI costs and payout currency conversion |
-| AI cost per Pro user | usually under $1/month at typical use |
+| ₹10,000/month | about $113.60 after fees, at ₹88 per dollar (check today's rate) |
+| Plus | $5/month; Dodo keeps about 14% (6% + 40¢), so you get about $4.30 |
+| Pro | $10/month; Dodo keeps about 10%, so you get about $9.00 |
+| Subscribers needed | **13 Pro**, or **27 Plus**, or a mix like **8 Pro + 10 Plus**. Aim a few higher to cover AI costs and payout currency conversion |
+| AI cost per paying user | usually under $1/month at typical use. The monthly draft limits (100 on Plus, 500 on Pro) cap the worst case |
 
-If about 3% of free signups upgrade, 16 subscribers means roughly 500 signups. Direct outreach converts much better than that, so the plan leans on it. These are planning assumptions to size your effort, not predictions.
+Plus exists so that a developer with one app on both stores pays $5 instead of skipping a $10 plan. Expect most solo developers on Plus, and studios or developers with several apps on Pro. If about 3% of free signups upgrade, 18 subscribers means roughly 600 signups. Direct outreach converts much better than that, so the plan leans on it. These are planning assumptions to size your effort, not predictions.
 
 **Realistic path:** 5–10 paying developers by day 30 if you do the daily outreach, then ₹10,000/month between day 60 and 90.
 
@@ -46,7 +46,7 @@ Keep the benchmark and outcome numbers private until they're a selling point: In
 
 - [ ] 10 personal emails a day (70 total).
 - [ ] Watch where people drop off: sign in → connect store → first reply → first fix pending.
-- [ ] Offer early users Pro free for a month in exchange for a 15-minute call.
+- [ ] Offer early users a free month of Plus or Pro in exchange for a 15-minute call.
 - [ ] Get 3 short testimonials ("got 4 reviewers to update their rating in a week").
 - [ ] Ask every early user with a real app to turn on the public fix log and add the badge to their README or website. Each badge is a free, permanent link back to you.
 - [ ] Switch Dodo to live mode.
@@ -57,7 +57,7 @@ Keep the benchmark and outcome numbers private until they're a selling point: In
 - [ ] Post "Show HN: ReviewLoop – follow up with App Store reviewers when you ship the fix".
 - [ ] Post on r/SideProject and Indie Hackers. On r/iOSProgramming and r/androiddev, only post in the threads or days their rules allow for self-promotion.
 - [ ] Post a thread on X with the demo video, and answer every reply.
-- [ ] Founding-member offer: $6/month locked in for the first 20 subscribers. Create it as a separate Dodo product.
+- [ ] Founding-member offer: Pro at $7/month, locked in for the first 20 subscribers. Create it as a separate Dodo product, add its id after a comma in `DODO_PRO_PRODUCT_ID` (the first id stays the regular price sold at checkout), and share its Dodo payment link. Buyers are matched to their account by email, so ask them to pay with the email on their GitHub account.
 - [ ] Keep sending the 10 emails a day.
 
 ## Week 4 (days 22–30): convert and learn
@@ -113,7 +113,7 @@ The founder dashboard at `/admin` shows all of these, plus AI spend and any brok
 | Replies sent per active user | Are they getting value? |
 | Follow-ups sent, and ratings raised | Your proof. Put these numbers on the landing page. |
 | Public fix logs turned on | Your free distribution. Each one is a page and a badge linking back to you. |
-| Free → Pro conversions | Pricing and plan limits |
+| Free → Plus and Free → Pro conversions, and Plus → Pro upgrades | Whether the plan limits are in the right place |
 
 ## Decision points
 
